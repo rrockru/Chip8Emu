@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTableWidget>
+#include <QTableView>
 #include <QTimer>
 
 #include "cpu.h"
@@ -22,12 +22,14 @@ class MainWindow : public QMainWindow
 
     DisplayWidget *displayWidget;
     HexViewWidget *memoryWidget;
-    QTableWidget *registersWidget;
+    QTableView *registersView;
 
 public slots:
-    void openRom();
-    void run();
-    void step();
+    void onOpenRom();
+    void onRun();
+    void onStep();
+    void onReset();
+    void onCpuError(uint16_t op, uint16_t addr);
 
 public:
     MainWindow(QWidget *parent = 0);

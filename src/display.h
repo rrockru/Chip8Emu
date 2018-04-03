@@ -13,7 +13,7 @@ class DisplayWidget : public QOpenGLWidget
     Memory *memory;
 
 public slots:
-    void redraw();
+    void draw();
 
 public:
     DisplayWidget(QWidget *parent, Memory *memory);

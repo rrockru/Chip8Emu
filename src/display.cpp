@@ -31,7 +31,7 @@ void DisplayWidget::paintEvent(QPaintEvent *event)
     painter.end();
 }
 
-void DisplayWidget::redraw()
+void DisplayWidget::draw()
 {
     update();
 }

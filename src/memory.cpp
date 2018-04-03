@@ -37,7 +37,12 @@ void Memory::CleanVRam()
     }
 }
 
-void Memory::LoadRom(QByteArray rom){
+void Memory::LoadRom(QByteArray rom) {
     Clean();
     ram.replace(0x200, rom.size(), rom);
+}
+
+void Memory::Reset() {
+    CleanStack();
+    CleanVRam();
 }

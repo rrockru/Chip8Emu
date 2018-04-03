@@ -24,16 +24,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-    cpu.cpp \
-    memory.cpp \
-    display.cpp \
-    hexview.cpp
+        src/main.cpp \
+        src/mainwindow.cpp \
+    src/cpu.cpp \
+    src/memory.cpp \
+    src/display.cpp \
+    src/hexview.cpp
 
 HEADERS += \
-        mainwindow.h \
-    cpu.h \
-    memory.h \
-    display.h \
-    hexview.h
+        src/mainwindow.h \
+    src/cpu.h \
+    src/memory.h \
+    src/display.h \
+    src/hexview.h
+
+DISTFILES += \
+    roms/test.rom \
+    .gitignore

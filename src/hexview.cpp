@@ -69,7 +69,6 @@ void HexViewWidget::paintEvent(QPaintEvent *event)
         painter.drawText(m_posAddr, yPos, address);
 
         for (int xPos = m_posHex, i = 0; i < BYTES_PER_LINE && ((lineIdx - firstLineIdx) * BYTES_PER_LINE + i) < data.size(); i++, xPos += 3 * m_charWidth) {
-            int pos = (lineIdx * BYTES_PER_LINE + i) * 2;
             QString val = QString::number((data.at((lineIdx - firstLineIdx) * BYTES_PER_LINE + i) & 0xF0) >> 4, 16);
             painter.drawText(xPos, yPos, val);
             val = QString::number((data.at((lineIdx - firstLineIdx) * BYTES_PER_LINE + i) & 0xF), 16);

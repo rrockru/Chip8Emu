@@ -25,7 +25,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    cpu.cpp \
+    memory.cpp \
+    display.cpp \
+    hexview.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    cpu.h \
+    memory.h \
+    display.h \
+    hexview.h

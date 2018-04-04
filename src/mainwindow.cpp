@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QMessageBox>
@@ -15,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     cpu = new CPU(this, memory);
     connect(cpu, &CPU::error, this, &MainWindow::onCpuError);
 
-    //setFixedSize(640, 480);
+    setMinimumSize(1024, 800);
 
     QToolBar *toolBar = new QToolBar(this);
     toolBar->addAction(style()->standardIcon(QStyle::SP_DirIcon), "Open", this, &MainWindow::onOpenRom);
@@ -25,30 +26,35 @@ MainWindow::MainWindow(QWidget *parent)
     addToolBar(toolBar);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
-    QVBoxLayout *vLayout = new QVBoxLayout;
+    QVBoxLayout *leftVLayout = new QVBoxLayout;
+    QVBoxLayout *rightVLayout = new QVBoxLayout;
 
     displayWidget = new DisplayWidget(this, memory);
     connect(cpu, &CPU::draw, displayWidget, &DisplayWidget::draw);
 
+    disasmWidget = new DisasmWidget(this, memory);
+    connect(cpu, &CPU::tickSignal, disasmWidget, &DisasmWidget::highlightCurrentLine);
+
     memoryWidget = new HexViewWidget(this, memory);
+    leftVLayout->addWidget(disasmWidget, 2);
+    leftVLayout->addWidget(memoryWidget, 1);
 
     registersView = new QTableView(this);
     registersView->horizontalHeader()->hide();
+    registersView->setFixedWidth(displayWidget->width());
+    registersView->setModel(cpu);
 
-    vLayout->addWidget(displayWidget);
-    vLayout->addWidget(registersView);
-    hLayout->addWidget(memoryWidget);
-    hLayout->addLayout(vLayout);
+    rightVLayout->addWidget(displayWidget);
+    rightVLayout->addWidget(registersView);
+    hLayout->addLayout(leftVLayout);
+    hLayout->addLayout(rightVLayout, 0);
 
     QWidget *centralWidget = new QWidget();
     centralWidget->setLayout(hLayout);
 
     setCentralWidget(centralWidget);
 
-    cpuTimer = new QTimer(this);
-    connect(cpuTimer, &QTimer::timeout, cpu, &CPU::tick);
-    //connect(timer, &QTimer::timeout, memoryWidget, &HexViewWidget::redraw);
-
+    prevFilePath = QDir::currentPath();
 }
 
 MainWindow::~MainWindow()
@@ -58,9 +64,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::onOpenRom()
 {
-    QFile file(QFileDialog::getOpenFileName(this, tr("Open ROM"), QDir::currentPath(), tr("ROM Files (*.rom)")));
+    QFile file(QFileDialog::getOpenFileName(this, tr("Open ROM"), prevFilePath, tr("ROM Files (*.rom)")));
     if (file.fileName().isEmpty())
         return;
+    prevFilePath = QFileInfo(file).absolutePath();
     if (file.size() > 0xFFF - 0x200) {
         QMessageBox::critical(this, tr("Error!"), tr("File ") + file.fileName() + tr(" is too large"), QMessageBox::Ok);
         return;
@@ -70,38 +77,38 @@ void MainWindow::onOpenRom()
         return;
     }
     memory->LoadRom(file.readAll());
+    disasmWidget->Disasm();
     memoryWidget->redraw();
-}
-
-void MainWindow::onRun()
-{
-    registersView->setModel(NULL);
-
-    cpuTimer->start(2);
-}
-
-void MainWindow::onStep()
-{
-
-    registersView->setModel(cpu);
-
-    cpu->tick();
-    memoryWidget->redraw();
-}
-
-void MainWindow::onReset() {
-    if (cpuTimer->isActive())
-        cpuTimer->stop();
-    cpu->Reset();
-    memory->Reset();
-    displayWidget->draw();
 }
 
 void MainWindow::onCpuError(uint16_t op, uint16_t addr)
 {
-    if (cpuTimer->isActive())
-        cpuTimer->stop();
+    memoryWidget->setEnabled(true);
+    registersView->setEnabled(true);
     QMessageBox::information(this, "Info!", QString("Unknown instruction %1 at 0x%2")
                              .arg(op, 4, 16, QChar('0'))
                              .arg(addr, 3, 16, QChar('0')), QMessageBox::Ok);
+}
+
+void MainWindow::onRun()
+{
+    memoryWidget->setEnabled(false);
+    registersView->setEnabled(false);
+    disasmWidget->cleanHighlight();
+    cpu->onRun();
+}
+
+void MainWindow::onStep()
+{
+    if (cpu->isRun())
+        return;
+    cpu->onStep();
+}
+
+void MainWindow::onReset()
+{
+    memoryWidget->setEnabled(true);
+    registersView->setEnabled(true);
+    disasmWidget->highlightCurrentLine(0x200);
+    cpu->onReset();
 }

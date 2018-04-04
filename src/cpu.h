@@ -1,8 +1,8 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include <QObject>
 #include <QAbstractTableModel>
+#include <QTimer>
 
 #include "memory.h"
 
@@ -15,19 +15,27 @@ class CPU: public QAbstractTableModel
     uint16_t SP;
     uint16_t PC;
 
+    QTimer *cpuTimer;
+
     Memory *memory;
 
-public slots:
     void tick();
+
+public slots:
+    void onRun();
+    void onStep();
+    void onReset();
 
 signals:
     void error(uint16_t op, uint16_t addr);
     void draw();
+    void tickSignal(uint16_t pc);
 
 public:
     CPU(QObject *parent, Memory *);
 
     void Reset();
+    bool isRun() { return cpuTimer->isActive(); }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;

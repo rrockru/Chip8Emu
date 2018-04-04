@@ -7,6 +7,9 @@ CPU::CPU(QObject *parent, Memory *memory):
     QAbstractTableModel(parent),
     memory(memory)
 {
+    cpuTimer = new QTimer(this);
+    connect(cpuTimer, &QTimer::timeout, this, &CPU::tick);
+
     Reset();
 }
 
@@ -19,6 +22,7 @@ void CPU::Reset()
     PC = 0x200;
 
     emit dataChanged(createIndex(0, 0), createIndex(19, 0));
+    emit draw();
 }
 
 void CPU::tick()
@@ -65,15 +69,41 @@ void CPU::tick()
         break;
     }
     default: {
+        if (cpuTimer->isActive())
+            cpuTimer->stop();
+        emit tickSignal(PC);
         emit error(op, PC);
         return;
     }
     }
 
     PC += 2;
-
-    emit dataChanged(createIndex(0, 0), createIndex(19, 0));
 }
+
+void CPU::onRun()
+{
+    if (!cpuTimer->isActive())
+        cpuTimer->start(2);
+}
+
+void CPU::onStep()
+{
+    if (!cpuTimer->isActive()) {
+        tick();
+        emit dataChanged(createIndex(0, 0), createIndex(19, 0));
+        emit tickSignal(PC);
+    }
+}
+
+void CPU::onReset()
+{
+    if (cpuTimer->isActive())
+        cpuTimer->stop();
+    memory->Reset();
+    Reset();
+}
+
+/* Model stuff */
 
 int CPU::rowCount(const QModelIndex &) const
 {
@@ -84,8 +114,6 @@ int CPU::columnCount(const QModelIndex &) const
 {
     return 1;
 }
-
-/* Model stuff */
 
 QVariant CPU::data(const QModelIndex &index, int role) const
 {
@@ -117,7 +145,7 @@ QVariant CPU::headerData(int section, Qt::Orientation, int role) const
     switch(role) {
     case Qt::DisplayRole:
         if (section < 16) {
-            return QString("V%1").arg(section, 1, 16);
+            return QString("V%1").arg(section, 1, 16).toUpper();
         }
         switch (section) {
         case 16:

@@ -29,14 +29,18 @@ SOURCES += \
     src/cpu.cpp \
     src/memory.cpp \
     src/display.cpp \
-    src/hexview.cpp
+    src/hexview.cpp \
+    src/disasm.cpp \
+    src/registers.cpp
 
 HEADERS += \
         src/mainwindow.h \
     src/cpu.h \
     src/memory.h \
     src/display.h \
-    src/hexview.h
+    src/hexview.h \
+    src/disasm.h \
+    src/registers.h
 
 DISTFILES += \
     roms/test.rom \

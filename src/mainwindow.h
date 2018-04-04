@@ -3,33 +3,34 @@
 
 #include <QMainWindow>
 #include <QTableView>
-#include <QTimer>
 
 #include "cpu.h"
 #include "memory.h"
 
 #include "display.h"
 #include "hexview.h"
+#include "disasm.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    QTimer *cpuTimer;
-
     CPU *cpu;
     Memory *memory;
 
     DisplayWidget *displayWidget;
+    DisasmWidget *disasmWidget;
     HexViewWidget *memoryWidget;
     QTableView *registersView;
 
+    QString prevFilePath;
+
 public slots:
     void onOpenRom();
+    void onCpuError(uint16_t op, uint16_t addr);
     void onRun();
     void onStep();
     void onReset();
-    void onCpuError(uint16_t op, uint16_t addr);
 
 public:
     MainWindow(QWidget *parent = 0);

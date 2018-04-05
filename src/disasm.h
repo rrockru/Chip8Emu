@@ -19,7 +19,7 @@ class DisasmWidget : public QTextEdit
     Memory *memory;
 
 public slots:
-    void highlightCurrentLine(uint16_t pc);
+    void highlightCurrentLine(int pc);
     void cleanHighlight();
 
 public:

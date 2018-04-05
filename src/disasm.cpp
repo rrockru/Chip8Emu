@@ -28,9 +28,8 @@ DisasmWidget::DisasmWidget(QWidget *parent, Memory *memory):
 void DisasmWidget::Disasm()
 {
     clear();
-    for (int pc = 0x200; pc < 0xEA0; pc += 2) {
-        uint16_t op = memory->GetRamWord(pc);
-        if (op == 0) continue;
+    for (int pc = 0x200; pc < 0x200 + memory->getRomSize(); pc += 2) {
+        uint16_t op = memory->getRamWord(pc);
         QString addrOp = QString("%1 %2 %3")
                 .arg(pc, 3, 16)
                 .arg(op >> 8, 2, 16, QChar('0'))
@@ -112,7 +111,7 @@ void DisasmWidget::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::black);
 }
 
-void DisasmWidget::highlightCurrentLine(uint16_t pc)
+void DisasmWidget::highlightCurrentLine(int pc)
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 

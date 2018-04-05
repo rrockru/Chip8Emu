@@ -26,12 +26,12 @@ HexViewWidget::HexViewWidget(QWidget *parent, Memory *memory):
 
 QSize HexViewWidget::FullSize() const
 {
-    if(!memory->GetRam()->size())
+    if(!memory->getRam()->size())
         return QSize(0, 0);
 
     int width = m_posHex + HEXCHARS_IN_LINE * m_charWidth + GAP_HEX_END;
-    int height = memory->GetRam()->size() / BYTES_PER_LINE;
-    if (memory->GetRam()->size() % BYTES_PER_LINE)
+    int height = memory->getRam()->size() / BYTES_PER_LINE;
+    if (memory->getRam()->size() % BYTES_PER_LINE)
         height++;
 
     height *= m_charHeight;
@@ -50,9 +50,9 @@ void HexViewWidget::paintEvent(QPaintEvent *event)
 
     int firstLineIdx = verticalScrollBar()->value();
     int lastLineIdx = firstLineIdx + areaSize.height() / m_charHeight;
-    if(lastLineIdx > memory->GetRam()->size() / BYTES_PER_LINE) {
-        lastLineIdx = memory->GetRam()->size() / BYTES_PER_LINE;
-        if (memory->GetRam()->size() % BYTES_PER_LINE)
+    if(lastLineIdx > memory->getRam()->size() / BYTES_PER_LINE) {
+        lastLineIdx = memory->getRam()->size() / BYTES_PER_LINE;
+        if (memory->getRam()->size() % BYTES_PER_LINE)
             lastLineIdx++;
     }
 
@@ -63,7 +63,7 @@ void HexViewWidget::paintEvent(QPaintEvent *event)
 
     int yPosStart = m_charHeight;
 
-    QByteArray data = memory->GetRam()->mid(firstLineIdx * BYTES_PER_LINE, (lastLineIdx - firstLineIdx) * BYTES_PER_LINE);
+    QByteArray data = memory->getRam()->mid(firstLineIdx * BYTES_PER_LINE, (lastLineIdx - firstLineIdx) * BYTES_PER_LINE);
     for (int lineIdx = firstLineIdx, yPos = yPosStart; lineIdx < lastLineIdx; lineIdx += 1, yPos += m_charHeight) {
         QString address = QString("%1").arg(lineIdx * 16, 3, 16, QChar('0'));
         painter.drawText(m_posAddr, yPos, address);

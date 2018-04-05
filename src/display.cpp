@@ -20,7 +20,7 @@ void DisplayWidget::paintEvent(QPaintEvent *event)
     painter.fillRect(event->rect(), Qt::black);
 
     for (int i = 0; i < 0x800; i++) {
-        if (memory->GetVRamBit(i)) {
+        if (memory->getVRamBit(i)) {
             int x = (i % 64) * 5 + 1;
             int y = (i / 64) * 5 + 1;
 

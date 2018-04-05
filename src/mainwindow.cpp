@@ -12,9 +12,12 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    memory = new Memory();
-    cpu = new CPU(this, memory);
+    memory = new Memory;
+    connect(this, &MainWindow::reset, memory, &Memory::onReset);
+
+    cpu = new CPU(memory);
     connect(cpu, &CPU::error, this, &MainWindow::onCpuError);
+    connect(this, &MainWindow::reset, cpu, &CPU::onReset);
 
     setMinimumSize(1024, 800);
 
@@ -33,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cpu, &CPU::draw, displayWidget, &DisplayWidget::draw);
 
     disasmWidget = new DisasmWidget(this, memory);
-    connect(cpu, &CPU::tickSignal, disasmWidget, &DisasmWidget::highlightCurrentLine);
+    connect(cpu, &CPU::tick, disasmWidget, &DisasmWidget::highlightCurrentLine);
 
     memoryWidget = new HexViewWidget(this, memory);
     leftVLayout->addWidget(disasmWidget, 2);
@@ -42,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     registersView = new QTableView(this);
     registersView->horizontalHeader()->hide();
     registersView->setFixedWidth(displayWidget->width());
-    registersView->setModel(cpu);
+    //registersView->setModel(cpu);
 
     rightVLayout->addWidget(displayWidget);
     rightVLayout->addWidget(registersView);
@@ -76,39 +79,44 @@ void MainWindow::onOpenRom()
         QMessageBox::critical(this, tr("Error!"), tr("Unable to open file ") + file.fileName(), QMessageBox::Ok);
         return;
     }
-    memory->LoadRom(file.readAll());
+    memory->loadRom(file.readAll());
     disasmWidget->Disasm();
     memoryWidget->redraw();
+
+    emit reset();
 }
 
-void MainWindow::onCpuError(uint16_t op, uint16_t addr)
+void MainWindow::onCpuError(int op, int addr)
 {
-    memoryWidget->setEnabled(true);
-    registersView->setEnabled(true);
     QMessageBox::information(this, "Info!", QString("Unknown instruction %1 at 0x%2")
                              .arg(op, 4, 16, QChar('0'))
                              .arg(addr, 3, 16, QChar('0')), QMessageBox::Ok);
+    memoryWidget->setEnabled(true);
+    registersView->setEnabled(true);
 }
 
 void MainWindow::onRun()
 {
+    if (cpu->isRunning())
+        return;
     memoryWidget->setEnabled(false);
     registersView->setEnabled(false);
     disasmWidget->cleanHighlight();
-    cpu->onRun();
+    cpu->start();
 }
 
 void MainWindow::onStep()
 {
-    if (cpu->isRun())
+    if (cpu->isRunning())
         return;
-    cpu->onStep();
+    cpu->onTick();
 }
 
 void MainWindow::onReset()
 {
+    cpu->onStop();
     memoryWidget->setEnabled(true);
     registersView->setEnabled(true);
-    disasmWidget->highlightCurrentLine(0x200);
-    cpu->onReset();
+
+    emit reset();
 }

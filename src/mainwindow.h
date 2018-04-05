@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTableView>
+#include <QThread>
 
 #include "cpu.h"
 #include "memory.h"
@@ -25,9 +26,12 @@ class MainWindow : public QMainWindow
 
     QString prevFilePath;
 
+signals:
+    void reset();
+
 public slots:
     void onOpenRom();
-    void onCpuError(uint16_t op, uint16_t addr);
+    void onCpuError(int op, int addr);
     void onRun();
     void onStep();
     void onReset();

@@ -2,18 +2,15 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QThread>
 
-CPU::CPU(QObject *parent, Memory *memory):
-    QAbstractTableModel(parent),
+CPU::CPU(Memory *memory):
     memory(memory)
 {
-    cpuTimer = new QTimer(this);
-    connect(cpuTimer, &QTimer::timeout, this, &CPU::tick);
-
-    Reset();
+    onReset();
 }
 
-void CPU::Reset()
+void CPU::onReset()
 {
     for (int i = 0; i < 16; i++)
         V[i] = 0;
@@ -21,13 +18,13 @@ void CPU::Reset()
     SP = 0;
     PC = 0x200;
 
-    emit dataChanged(createIndex(0, 0), createIndex(19, 0));
     emit draw();
+    emit tick(PC);
 }
 
-void CPU::tick()
+void CPU::onTick()
 {
-    uint16_t op = memory->GetRamWord(PC);
+    uint16_t op = memory->getRamWord(PC);
 
     switch (op >> 12) {
     case 0x1: {
@@ -61,7 +58,7 @@ void CPU::tick()
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < 8; j++) {
-                memory->SetVRamBit((y + i) * 64 + (x + j), (memory->GetRamByte(I + i) >> (7 - (j % 8))) & 1);
+                memory->setVRamBit((y + i) * 64 + (x + j), (memory->getRamByte(I + i) >> (7 - (j % 8))) & 1);
             }
         }
 
@@ -69,96 +66,34 @@ void CPU::tick()
         break;
     }
     default: {
-        if (cpuTimer->isActive())
-            cpuTimer->stop();
-        emit tickSignal(PC);
+        stopFlag = true;
         emit error(op, PC);
         return;
     }
     }
 
     PC += 2;
+
+    emit tick(PC);
 }
 
-void CPU::onRun()
+void CPU::run()
 {
-    if (!cpuTimer->isActive())
-        cpuTimer->start(2);
+    stopFlag = false;
+
+    while(!stopFlag) {
+        usleep(2000);
+        onTick();
+    }
+
+    emit finished();
 }
 
-void CPU::onStep()
+void CPU::onStop()
 {
-    if (!cpuTimer->isActive()) {
-        tick();
-        emit dataChanged(createIndex(0, 0), createIndex(19, 0));
-        emit tickSignal(PC);
+    if (isRunning()) {
+        stopFlag = true;
+        wait();
     }
 }
 
-void CPU::onReset()
-{
-    if (cpuTimer->isActive())
-        cpuTimer->stop();
-    memory->Reset();
-    Reset();
-}
-
-/* Model stuff */
-
-int CPU::rowCount(const QModelIndex &) const
-{
-    return 19;
-}
-
-int CPU::columnCount(const QModelIndex &) const
-{
-    return 1;
-}
-
-QVariant CPU::data(const QModelIndex &index, int role) const
-{
-    int row = index.row();
-
-    switch(role) {
-    case Qt::DisplayRole:
-        if (row < 16) {
-            return QString("%1").arg(V[row], 2, 16, QChar('0'));
-        }
-        switch (row) {
-        case 16:
-            return QString("%1").arg(I, 4, 16, QChar('0'));
-            break;
-        case 17:
-            return QString("%1").arg(SP, 4, 16, QChar('0'));
-            break;
-        case 18:
-            return QString("%1").arg(PC, 4, 16, QChar('0'));
-            break;
-        }
-        break;
-    }
-    return QVariant();
-}
-
-QVariant CPU::headerData(int section, Qt::Orientation, int role) const
-{
-    switch(role) {
-    case Qt::DisplayRole:
-        if (section < 16) {
-            return QString("V%1").arg(section, 1, 16).toUpper();
-        }
-        switch (section) {
-        case 16:
-            return "I";
-            break;
-        case 17:
-            return "SP";
-            break;
-        case 18:
-            return "PC";
-            break;
-        }
-        break;
-    }
-    return QVariant();
-}

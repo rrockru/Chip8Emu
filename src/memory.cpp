@@ -199,6 +199,8 @@ const char ascii[0x200] = {
 
 Memory::Memory()
 {
+    currentRomSize = 0;
+
     ram.resize(0x1000);
 
     for (int i = 0; i < 0x200; i++)
@@ -206,43 +208,44 @@ Memory::Memory()
 
     ram.replace(0, 0x200, QByteArray::fromRawData(rom, 0x200));
 
-    Clean();
+    clear();
 }
 
-void Memory::Clean()
+void Memory::clear()
 {
-    CleanRam();
-    CleanStack();
-    CleanVRam();
+    clearRam();
+    clearStack();
+    clearVRam();
 }
 
-void Memory::CleanRam()
+void Memory::clearRam()
 {
     for (int i = 0x200; i < 0xEA0; i++) {
         ram[i] = 0;
     }
 }
 
-void Memory::CleanStack()
+void Memory::clearStack()
 {
     for (int i = 0xEA0; i < 0xF00; i++) {
         ram[i] = 0;
     }
 }
 
-void Memory::CleanVRam()
+void Memory::clearVRam()
 {
     for (int i = 0xF00; i < 0x1000; i++) {
         ram[i] = 0;
     }
 }
 
-void Memory::LoadRom(QByteArray rom) {
-    Clean();
+void Memory::loadRom(QByteArray rom) {
+    clear();
     ram.replace(0x200, rom.size(), rom);
+    currentRomSize = rom.size();
 }
 
-void Memory::Reset() {
-    CleanStack();
-    CleanVRam();
+void Memory::onReset() {
+    clearStack();
+    clearVRam();
 }

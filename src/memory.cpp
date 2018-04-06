@@ -249,3 +249,17 @@ void Memory::onReset() {
     clearStack();
     clearVRam();
 }
+
+void Memory::pushToStack(uint8_t addr, uint16_t val) {
+    if (addr <= 96) {
+        setRamWord(0xF00 - addr, val);
+    }
+}
+
+uint16_t Memory::popFromStack(uint8_t addr) {
+    if (addr >= 2) {
+        return getRamWord(0xF00 - addr);
+    }
+
+    return 0;
+}

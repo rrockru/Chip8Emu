@@ -35,8 +35,40 @@ void DisasmWidget::Disasm()
                 .arg(op >> 8, 2, 16, QChar('0'))
                 .arg(op & 0xFF, 2, 16, QChar('0'));
         switch(op >> 12) {
+        case 0x0: {
+            switch (op >> 4) {
+            case 0xE: {
+                switch (op & 0xF) {
+                case 0x0: {
+                    append(QString("%1 CLS")
+                           .arg(addrOp).toUpper());
+                    break;
+                }
+                case 0xE: {
+                    append(QString("%1 RET")
+                           .arg(addrOp).toUpper());
+                    break;
+                }
+                }
+                break;
+            }
+            default: {
+                append(QString("%1 CALL #%2")
+                       .arg(addrOp)
+                       .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
+                break;
+            }
+            }
+            break;
+        }
         case 0x1: {
             append(QString("%1 JP #%2")
+                   .arg(addrOp)
+                   .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
+            break;
+        }
+        case 0x2: {
+            append(QString("%1 CALL #%2")
                    .arg(addrOp)
                    .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
             break;
@@ -76,7 +108,7 @@ void DisasmWidget::Disasm()
             break;
         }
         case 0xD: {
-            append(QString("%1 DRAW V%2, V%3, %4")
+            append(QString("%1 DRW V%2, V%3, %4")
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
                    .arg((op >> 4) & 0xF, 1, 16)

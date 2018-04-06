@@ -27,28 +27,81 @@ void CPU::onTick()
     uint16_t op = memory->getRamWord(PC);
 
     switch (op >> 12) {
+    case 0x0: {
+        switch (op >> 4) {
+        case 0xE: {
+            switch (op & 0xF) {
+            case 0x0: {
+                /* 00E0 CLR clear screen */
+                memory->clearVRam();
+                emit draw();
+
+                PC += 2;
+                break;
+            }
+            case 0xE: {
+                /* 00EE RET return from subroutine */
+                PC = memory->popFromStack(SP);
+                SP -= 2;
+
+                break;
+            }
+            }
+            break;
+        }
+        default: {
+            /* 0NNN CALL call RCA 1802 program at address NNN */
+
+            PC += 2;
+            break;
+        }
+        }
+        break;
+    }
     case 0x1: {
-        PC = (op & 0xFFF) - 2;
+        /* 1NNN JP jump to address NNN */
+        PC = (op & 0xFFF);
+
+        break;
+    }
+    case 0x2: {
+        /* 2NNN CALL call subroutine at NNN */
+        SP += 2;
+        memory->pushToStack(SP, PC + 2);
+        PC = (op & 0xFFF);
+
+        break;
     }
     case 0x3: {
+        /* 3XNN SE skip next if VX equals NN */
         if ((V[(op >> 8) & 0xF]) == (op & 0xFF))
             PC += 2;
+
+        PC += 2;
         break;
     }
     case 0x6: {
         V[(op >> 8) & 0xF] = op & 0xFF;
+
+        PC += 2;
         break;
     }
     case 0x7: {
         V[(op >> 8) & 0xF] += op & 0xFF;
+
+        PC += 2;
         break;
     }
     case 0xA: {
         I = op & 0xFFF;
+
+        PC += 2;
         break;
     }
     case 0xC: {
         V[(op >> 8) & 0xF] = (qrand() % 255) & (op & 0xFF);
+
+        PC += 2;
         break;
     }
     case 0xD: {
@@ -69,6 +122,8 @@ void CPU::onTick()
         V[0xF] = (flipFlag) ? 1 : 0;
 
         emit draw();
+
+        PC += 2;
         break;
     }
     default: {
@@ -76,9 +131,7 @@ void CPU::onTick()
         emit error(op, PC);
         return;
     }
-    }
-
-    PC += 2;
+    }    
 
     emit tick(PC);
 }

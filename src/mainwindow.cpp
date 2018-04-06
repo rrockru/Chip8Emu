@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cpu, &CPU::tick, disasmWidget, &DisasmWidget::highlightCurrentLine);
 
     memoryWidget = new HexViewWidget(this, memory);
+    connect(cpu, &CPU::tick, memoryWidget, &HexViewWidget::redraw);
+
     leftVLayout->addWidget(disasmWidget, 2);
     leftVLayout->addWidget(memoryWidget, 1);
 

@@ -191,6 +191,12 @@ void DisasmWidget::Disasm()
                    .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
             break;
         }
+        case 0xB: {
+            append(QString("%1 JP V0, #%2")
+                   .arg(addrOp)
+                   .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
+            break;
+        }
         case 0xC: {
             append(QString("%1 RND V%2, #%3")
                    .arg(addrOp)

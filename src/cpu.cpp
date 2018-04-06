@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QThread>
 
+#include "config.h"
+
 CPU::CPU(Memory *memory):
     memory(memory)
 {
@@ -207,6 +209,12 @@ void CPU::onTick()
         PC += 2;
         break;
     }
+    case 0xB: {
+        /* 1NNN JP jump to address V0 + NNN */
+        PC = V[0] + (op & 0xFFF);
+
+        break;
+    }
     case 0xC: {
         /* CXNN RND set VX to bitwise and on random number and NN */
         V[(op >> 8) & 0xF] = (qrand() % 255) & (op & 0xFF);
@@ -236,6 +244,9 @@ void CPU::onTick()
 
         PC += 2;
         break;
+    }
+    case 0xE: {
+
     }
     default: {
         stopFlag = true;

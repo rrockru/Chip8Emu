@@ -42,6 +42,7 @@ HEADERS += \
     src/hexview.h \
     src/disasm.h \
     src/registers.h \
-    src/stack.h
+    src/stack.h \
+    src/config.h
 
 DISTFILES +=

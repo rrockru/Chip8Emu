@@ -29,7 +29,7 @@ public:
     uint16_t getRomSize() { return currentRomSize; }
 
     char getRamByte(int pos) { return ram[pos]; }
-    uint16_t getRamWord(int pos) { return (ram[pos] << 8) + ram[pos + 1]; }
+    uint16_t getRamWord(int pos) { return ((uint8_t)ram[pos] << 8) + (uint8_t)ram[pos + 1]; }
     void setRamByte(int pos, int value) { ram[pos] = value; }
     bool getVRamBit(int pos) { return (ram[0xF00 + (pos / 8)] >> (7 - (pos % 8))) & 1; }
     void setVRamBit(int pos, bool value) { ram[0xF00 + (pos / 8)] = (ram[0xF00 + (pos / 8)]) | (value << (7 - (pos % 8))); }

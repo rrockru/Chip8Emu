@@ -33,46 +33,46 @@ void DisasmWidget::Disasm()
         QString addrOp = QString("%1 %2 %3")
                 .arg(pc, 3, 16)
                 .arg(op >> 8, 2, 16, QChar('0'))
-                .arg(op & 0xFF, 2, 16, QChar('0')).toUpper();
+                .arg(op & 0xFF, 2, 16, QChar('0'));
         switch(op >> 12) {
         case 0x1: {
-            append(QString("%1 JP 0x%2")
+            append(QString("%1 JP #%2")
                    .arg(addrOp)
-                   .arg(op & 0xFFF, 3, 16, QChar('0')));
+                   .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
             break;
         }
         case 0x3: {
-            append(QString("%1 SE V%2, %3")
+            append(QString("%1 SE V%2, #%3")
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
-                   .arg(op & 0xFF));
+                   .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
             break;
         }
         case 0x6: {
-            append(QString("%1 LD V%2, %3")
+            append(QString("%1 LD V%2, #%3")
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
-                   .arg(op & 0xFF));
+                   .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
             break;
         }
         case 0x7: {
-            append(QString("%1 ADD V%2, %3")
+            append(QString("%1 ADD V%2, #%3")
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
-                   .arg(op & 0xFF));
+                   .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
             break;
         }
         case 0xA: {
-            append(QString("%1 LD I, 0x%2")
+            append(QString("%1 LD I, #%2")
                    .arg(addrOp)
-                   .arg(op & 0xFFF, 3, 16, QChar('0')));
+                   .arg(op & 0xFFF, 3, 16, QChar('0')).toUpper());
             break;
         }
         case 0xC: {
-            append(QString("%1 RND V%2, %3")
+            append(QString("%1 RND V%2, #%3")
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
-                   .arg(op & 0xFF));
+                   .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
             break;
         }
         case 0xD: {
@@ -80,11 +80,11 @@ void DisasmWidget::Disasm()
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
                    .arg((op >> 4) & 0xF, 1, 16)
-                   .arg(op & 0xF));
+                   .arg(op & 0xF).toUpper());
             break;
         }
         default: {
-            append(QString("%1 Unknown instruction 0x%2!")
+            append(QString("%1 Unknown instruction #%2!")
                    .arg(addrOp)
                    .arg(op, 4, 16, QChar('0')));
             break;

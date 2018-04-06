@@ -57,12 +57,12 @@ void CPU::onTick()
         int height = op & 0xF;
 
         bool flipFlag = false;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < 8; j++) {
-                bool oldBit = memory->getVRamBit(y + i) * 64 + (x + j);
-                bool newBit = (memory->getRamByte(I + i) >> (7 - (j % 8))) & 1;
-                if ((oldBit == 1) && (newBit == 0)) flipFlag = true;
-                memory->setVRamBit((y + i) * 64 + (x + j), (memory->getRamByte(I + i) >> (7 - (j % 8))) & 1);
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < 8; i++) {
+                bool oldBit = memory->getVRamBit((y + j) * 64 + (x + i));
+                bool newBit = (memory->getRamByte(I + j) >> (7 - (i % 8))) & 1;
+                if (oldBit && !newBit) flipFlag = true;
+                memory->setVRamBit((y + j) * 64 + (x + i), (memory->getRamByte(I + j) >> (7 - (i % 8))) & 1);
             }
         }
 

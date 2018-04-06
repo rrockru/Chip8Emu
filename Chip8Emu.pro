@@ -42,6 +42,4 @@ HEADERS += \
     src/disasm.h \
     src/registers.h
 
-DISTFILES += \
-    roms/test.rom \
-    .gitignore
+DISTFILES +=

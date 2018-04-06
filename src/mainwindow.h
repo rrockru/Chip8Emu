@@ -11,6 +11,7 @@
 #include "display.h"
 #include "hexview.h"
 #include "disasm.h"
+#include "registers.h"
 
 class MainWindow : public QMainWindow
 {
@@ -22,7 +23,7 @@ class MainWindow : public QMainWindow
     DisplayWidget *displayWidget;
     DisasmWidget *disasmWidget;
     HexViewWidget *memoryWidget;
-    QTableView *registersView;
+    RegistersWidget *registersWidget;
 
     QString prevFilePath;
 

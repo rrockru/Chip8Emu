@@ -1,17 +1,27 @@
 #ifndef REGISTERS_H
 #define REGISTERS_H
 
-#include <QAbstractTableModel>
+#include <QAbstractScrollArea>
 
-class RegistersWidget : public QAbstractTableModel
+#include "cpu.h"
+
+class RegistersWidget : public QAbstractScrollArea
 {
-public:
-    RegistersWidget();
+    Q_OBJECT
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    CPU *cpu;
+
+    int m_charWidth;
+    int m_charHeight;
+
+public slots:
+    void redraw();
+
+public:
+    RegistersWidget(QWidget *parent, CPU *cpu);
+
+protected:
+    void paintEvent(QPaintEvent *event);
 };
 
 #endif // REGISTERS_H

@@ -33,6 +33,10 @@ public:
     CPU(Memory *);
 
     void run() override;
+    int getVRegister(int num) { if ((num >= 0) && (num <= 0xF)) return V[num]; else return 0; }
+    int getIRegister() { return I; }
+    int getSPRegister() { return SP; }
+    int getPCRegister() { return PC; }
 
 };
 

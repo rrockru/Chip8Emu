@@ -42,13 +42,12 @@ MainWindow::MainWindow(QWidget *parent)
     leftVLayout->addWidget(disasmWidget, 2);
     leftVLayout->addWidget(memoryWidget, 1);
 
-    registersView = new QTableView(this);
-    registersView->horizontalHeader()->hide();
-    registersView->setFixedWidth(displayWidget->width());
-    //registersView->setModel(cpu);
+    registersWidget = new RegistersWidget(this, cpu);
+    registersWidget->setMaximumWidth(displayWidget->width());
+    connect(cpu, &CPU::tick, registersWidget, &RegistersWidget::redraw);
 
     rightVLayout->addWidget(displayWidget);
-    rightVLayout->addWidget(registersView);
+    rightVLayout->addWidget(registersWidget);
     hLayout->addLayout(leftVLayout);
     hLayout->addLayout(rightVLayout, 0);
 
@@ -92,7 +91,7 @@ void MainWindow::onCpuError(int op, int addr)
                              .arg(op, 4, 16, QChar('0'))
                              .arg(addr, 3, 16, QChar('0')), QMessageBox::Ok);
     memoryWidget->setEnabled(true);
-    registersView->setEnabled(true);
+    registersWidget->setEnabled(true);
 }
 
 void MainWindow::onRun()
@@ -100,7 +99,7 @@ void MainWindow::onRun()
     if (cpu->isRunning())
         return;
     memoryWidget->setEnabled(false);
-    registersView->setEnabled(false);
+    registersWidget->setEnabled(false);
     disasmWidget->cleanHighlight();
     cpu->start();
 }
@@ -116,7 +115,7 @@ void MainWindow::onReset()
 {
     cpu->onStop();
     memoryWidget->setEnabled(true);
-    registersView->setEnabled(true);
+    registersWidget->setEnabled(true);
 
     emit reset();
 }

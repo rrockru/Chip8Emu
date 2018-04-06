@@ -56,11 +56,17 @@ void CPU::onTick()
         int y = V[(op >> 4) & 0xF];
         int height = op & 0xF;
 
+        bool flipFlag = false;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < 8; j++) {
+                bool oldBit = memory->getVRamBit(y + i) * 64 + (x + j);
+                bool newBit = (memory->getRamByte(I + i) >> (7 - (j % 8))) & 1;
+                if ((oldBit == 1) && (newBit == 0)) flipFlag = true;
                 memory->setVRamBit((y + i) * 64 + (x + j), (memory->getRamByte(I + i) >> (7 - (j % 8))) & 1);
             }
         }
+
+        V[0xF] = (flipFlag) ? 1 : 0;
 
         emit draw();
         break;

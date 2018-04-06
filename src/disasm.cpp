@@ -33,7 +33,7 @@ void DisasmWidget::Disasm()
         QString addrOp = QString("%1 %2 %3")
                 .arg(pc, 3, 16)
                 .arg(op >> 8, 2, 16, QChar('0'))
-                .arg(op & 0xFF, 2, 16, QChar('0'));
+                .arg(op & 0xFF, 2, 16, QChar('0').toUpper());
         switch(op >> 12) {
         case 0x0: {
             switch (op >> 4) {
@@ -80,6 +80,20 @@ void DisasmWidget::Disasm()
                    .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
             break;
         }
+        case 0x4: {
+            append(QString("%1 SNE V%2, #%3")
+                   .arg(addrOp)
+                   .arg((op >> 8) & 0xF, 1, 16)
+                   .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
+            break;
+        }
+        case 0x5: {
+            append(QString("%1 SE V%2, V%3")
+                   .arg(addrOp)
+                   .arg((op >> 8) & 0xF, 1, 16)
+                   .arg((op >> 4) & 0xF, 1, 16).toUpper());
+            break;
+        }
         case 0x6: {
             append(QString("%1 LD V%2, #%3")
                    .arg(addrOp)
@@ -92,6 +106,83 @@ void DisasmWidget::Disasm()
                    .arg(addrOp)
                    .arg((op >> 8) & 0xF, 1, 16)
                    .arg(op & 0xFF, 2, 16, QChar('0')).toUpper());
+            break;
+        }
+        case 0x8: {
+            switch (op & 0xF) {
+            case 0x0: {
+                append(QString("%1 LD V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x1: {
+                append(QString("%1 OR V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x2: {
+                append(QString("%1 AND V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x3: {
+                append(QString("%1 XOR V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x4: {
+                append(QString("%1 ADD V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x5: {
+                append(QString("%1 SUB V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x6: {
+                append(QString("%1 SHR V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0x7: {
+                append(QString("%1 SUBN V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0xE: {
+                append(QString("%1 SHL V%2, V%3")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16)
+                       .arg((op >> 4) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            default:
+                break;
+            }
+            break;
+        }
+        case 0x9: {
+            append(QString("%1 SNE V%2, V%3")
+                   .arg(addrOp)
+                   .arg((op >> 8) & 0xF, 1, 16)
+                   .arg((op >> 4) & 0xF, 1, 16).toUpper());
             break;
         }
         case 0xA: {

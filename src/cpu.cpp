@@ -80,31 +80,142 @@ void CPU::onTick()
         PC += 2;
         break;
     }
+    case 0x4: {
+        /* 4XNN SNE skip next if VX not equals NN */
+        if ((V[(op >> 8) & 0xF]) != (op & 0xFF))
+            PC += 2;
+
+        PC += 2;
+        break;
+    }
+    case 0x5: {
+        /* 5XY0 SE skip next if VX equals VY */
+        if ((V[(op >> 8) & 0xF]) == V[(op >> 4) & 0xF])
+            PC += 2;
+
+        PC += 2;
+        break;
+    }
     case 0x6: {
+        /* 6XNN LD set VX to NN */
         V[(op >> 8) & 0xF] = op & 0xFF;
 
         PC += 2;
         break;
     }
     case 0x7: {
+        /* 7XNN ADD add NN to VX */
         V[(op >> 8) & 0xF] += op & 0xFF;
 
         PC += 2;
         break;
     }
+    case 0x8: {
+        switch (op & 0xF) {
+        case 0x0: {
+            /* 8XY0 LD set VX to VY */
+            V[(op >> 8) & 0xF] = V[(op >> 4) & 0xF];
+
+            PC += 2;
+            break;
+        }
+        case 0x1: {
+            /* 8XY1 OR set VX to VX | VY */
+            V[(op >> 8) & 0xF] = V[(op >> 8) & 0xF] | V[(op >> 4) & 0xF];
+
+            PC += 2;
+            break;
+        }
+        case 0x2: {
+            /* 8XY2 AND set VX to VX & VY */
+            V[(op >> 8) & 0xF] = V[(op >> 8) & 0xF] & V[(op >> 4) & 0xF];
+
+            PC += 2;
+            break;
+        }
+        case 0x3: {
+            /* 8XY3 XOR set VX to VX ^ VY */
+            V[(op >> 8) & 0xF] = V[(op >> 8) & 0xF] ^ V[(op >> 4) & 0xF];
+
+            PC += 2;
+            break;
+        }
+        case 0x4: {
+            /* 8XY4 ADD set VX to VX + VY with carry */
+            uint16_t res = V[(op >> 8) & 0xF] + V[(op >> 4) & 0xF];
+            V[0xF] = (res >> 8) ? 1 : 0;
+            V[(op >> 8) & 0xF] = res &0xFF;
+
+            PC += 2;
+            break;
+        }
+        case 0x5: {
+            /* 8XY5 SUB set VX to VX - VY with borrow */
+            uint16_t res = V[(op >> 8) & 0xF] - V[(op >> 4) & 0xF];
+            V[0xF] = (res >> 8) ? 1 : 0;
+            V[(op >> 8) & 0xF] = res &0xFF;
+
+            PC += 2;
+            break;
+        }
+        case 0x6: {
+            /* 8XY6 SHR shift VY by one and copy result to VX. VF = LSB */
+            V[0xF] = V[(op >> 4) * 0xF] & 1;
+            V[(op >> 8) & 0xF] = V[(op >> 4) * 0xF] >> 1;
+
+            PC += 2;
+            break;
+        }
+        case 0x7: {
+            /* 8XY7 SUB set VX to VY - VX with borrow */
+            uint16_t res = V[(op >> 4) & 0xF] - V[(op >> 8) & 0xF];
+            V[0xF] = (res >> 8) ? 1 : 0;
+            V[(op >> 8) & 0xF] = res &0xFF;
+
+            PC += 2;
+            break;
+        }
+        case 0xE: {
+            /* 8XYE SHL shift VY by one and copy result to VX. VF = MSB */
+            V[0xF] = (V[(op >> 4) * 0xF] >> 7) & 1;
+            V[(op >> 8) & 0xF] = (V[(op >> 4) * 0xF] << 1) & 0xFF;
+
+            PC += 2;
+            break;
+        }
+        default: {
+
+            PC += 2;
+            break;
+        }
+        }
+
+        break;
+    }
+    case 0x9: {
+        /* 9XY0 SNE skip next if VX not equals VY */
+        if ((V[(op >> 8) & 0xF]) != V[(op >> 4) & 0xF])
+            PC += 2;
+
+        PC += 2;
+        break;
+    }
     case 0xA: {
+        /* ANNN LD I set I to NNN */
         I = op & 0xFFF;
 
         PC += 2;
         break;
     }
     case 0xC: {
+        /* CXNN RND set VX to bitwise and on random number and NN */
         V[(op >> 8) & 0xF] = (qrand() % 255) & (op & 0xFF);
 
         PC += 2;
         break;
     }
     case 0xD: {
+        /* DXYN DRW draw sprite from register I with height of N on coordinates (VX, VY) */
         int x = V[(op >> 8) & 0xF];
         int y = V[(op >> 4) & 0xF];
         int height = op & 0xF;

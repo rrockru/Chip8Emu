@@ -85,6 +85,9 @@ void MainWindow::onOpenRom()
         QMessageBox::critical(this, tr("Error!"), tr("Unable to open file ") + file.fileName(), QMessageBox::Ok);
         return;
     }
+
+    setWindowTitle(QString("Chip8Emu - %1").arg(file.fileName()));
+
     memory->loadRom(file.readAll());
     disasmWidget->Disasm();
     memoryWidget->redraw();

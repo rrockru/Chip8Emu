@@ -41,8 +41,8 @@ void CPU::onTick()
             }
             case 0xE: {
                 /* 00EE RET return from subroutine */
-                PC = memory->popFromStack(SP);
                 SP -= 2;
+                PC = memory->popFromStack(SP);
 
                 break;
             }
@@ -66,8 +66,8 @@ void CPU::onTick()
     }
     case 0x2: {
         /* 2NNN CALL call subroutine at NNN */
-        SP += 2;
         memory->pushToStack(SP, PC + 2);
+        SP += 2;
         PC = (op & 0xFFF);
 
         break;

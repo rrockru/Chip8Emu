@@ -252,13 +252,13 @@ void Memory::onReset() {
 
 void Memory::pushToStack(uint8_t addr, uint16_t val) {
     if (addr <= 96) {
-        setRamWord(0xF00 - addr, val);
+        setRamWord(0xEFE - addr, val);
     }
 }
 
 uint16_t Memory::popFromStack(uint8_t addr) {
-    if (addr >= 2) {
-        return getRamWord(0xF00 - addr);
+    if (addr >= 0) {
+        return getRamWord(0xEFE - addr);
     }
 
     return 0;

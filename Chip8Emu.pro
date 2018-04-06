@@ -31,7 +31,8 @@ SOURCES += \
     src/display.cpp \
     src/hexview.cpp \
     src/disasm.cpp \
-    src/registers.cpp
+    src/registers.cpp \
+    src/stack.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -40,6 +41,7 @@ HEADERS += \
     src/display.h \
     src/hexview.h \
     src/disasm.h \
-    src/registers.h
+    src/registers.h \
+    src/stack.h
 
 DISTFILES +=

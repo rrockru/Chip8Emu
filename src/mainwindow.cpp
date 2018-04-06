@@ -48,8 +48,13 @@ MainWindow::MainWindow(QWidget *parent)
     registersWidget->setMaximumWidth(displayWidget->width());
     connect(cpu, &CPU::tick, registersWidget, &RegistersWidget::redraw);
 
+    stackWidget = new StackWidget(this, cpu, memory);
+    stackWidget->setMaximumWidth(displayWidget->width());
+    connect(cpu, &CPU::tick, stackWidget, &StackWidget::redraw);
+
     rightVLayout->addWidget(displayWidget);
     rightVLayout->addWidget(registersWidget);
+    rightVLayout->addWidget(stackWidget);
     hLayout->addLayout(leftVLayout);
     hLayout->addLayout(rightVLayout, 0);
 

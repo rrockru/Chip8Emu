@@ -12,6 +12,8 @@ RegistersWidget::RegistersWidget(QWidget *parent, CPU *cpu):
 
     m_charWidth = fontMetrics().width(QLatin1Char('9'));
     m_charHeight = fontMetrics().height();
+
+    setMaximumHeight(START_GAP + m_charHeight * 7);
 }
 
 

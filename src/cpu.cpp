@@ -6,8 +6,9 @@
 
 #include "config.h"
 
-CPU::CPU(Memory *memory):
-    memory(memory)
+CPU::CPU(Memory *memory, Keyboard *keyboard):
+    memory(memory),
+    keyboard(keyboard)
 {
     onReset();
 }
@@ -246,7 +247,27 @@ void CPU::onTick()
         break;
     }
     case 0xE: {
+        switch (op & 0xFF) {
+        case 0x9E: {
+            /* EX9E SKP skip next if key in VX is pressed */
+            if (keyboard->getKeyState(V[(op >> 8) & 0xF]))
+                PC += 2;
 
+            break;
+        }
+        case 0xA1: {
+            /* EXA1 SKNP skip next if key in VX is not pressed */
+            if (!keyboard->getKeyState(V[(op >> 8) & 0xF]))
+                PC += 2;
+
+            break;
+        }
+        default:
+            break;
+        }
+
+        PC += 2;
+        break;
     }
     default: {
         stopFlag = true;

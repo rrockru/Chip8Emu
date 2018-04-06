@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Qt>
+
 const unsigned char rom[0x200] = {
     0x91, 0xBB, 0xFF, 0x01, 0xB2, 0xB6, 0xF8, 0xCF,
         0xA2, 0xF8, 0x81, 0xB1, 0xF8, 0x46, 0xA1, 0x90,
@@ -198,6 +200,11 @@ const unsigned char ascii[0x200] = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-
+const unsigned char keyMapping[0x10] = {
+    Qt::Key_1, Qt::Key_2, Qt::Key_3, Qt::Key_4,
+    Qt::Key_Q, Qt::Key_W, Qt::Key_E, Qt::Key_R,
+    Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_F,
+    Qt::Key_Z, Qt::Key_X, Qt::Key_C, Qt::Key_V
+};
 
 #endif // CONFIG_H

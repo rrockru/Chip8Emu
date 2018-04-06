@@ -33,7 +33,7 @@ void DisasmWidget::Disasm()
         QString addrOp = QString("%1 %2 %3")
                 .arg(pc, 3, 16)
                 .arg(op >> 8, 2, 16, QChar('0'))
-                .arg(op & 0xFF, 2, 16, QChar('0').toUpper());
+                .arg(op & 0xFF, 2, 16, QChar('0'));
         switch(op >> 12) {
         case 0x0: {
             switch (op >> 4) {
@@ -212,10 +212,28 @@ void DisasmWidget::Disasm()
                    .arg(op & 0xF).toUpper());
             break;
         }
+        case 0xE: {
+            switch (op & 0xFF) {
+            case 0x9E: {
+                append(QString("%1 SKP V%2")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            case 0xA1: {
+                append(QString("%1 SKNP V%2")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+                break;
+            }
+            default:
+                break;
+            }
+            break;
+        }
         default: {
-            append(QString("%1 Unknown instruction #%2!")
-                   .arg(addrOp)
-                   .arg(op, 4, 16, QChar('0')));
+            append(QString("%1 ???")
+                   .arg(addrOp).toUpper());
             break;
         }
         }
@@ -249,8 +267,8 @@ void DisasmWidget::highlightCurrentLine(int pc)
 
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    //selection.cursor = document()->find(QRegExp(QString("^%1 ").arg(pc, 3, 16).toUpper()));
-    selection.cursor = QTextCursor(document()->findBlockByLineNumber((pc - 0x200) / 2));
+    selection.cursor = document()->find(QRegExp(QString("^%1 ").arg(pc, 3, 16).toUpper()));
+    //selection.cursor = QTextCursor(document()->findBlockByLineNumber((pc - 0x200) / 2));
     selection.cursor.clearSelection();
     extraSelections.append(selection);
 

@@ -4,6 +4,7 @@
 #include <QThread>
 
 #include "memory.h"
+#include "keyboard.h"
 
 class CPU: public QThread
 {
@@ -15,6 +16,7 @@ class CPU: public QThread
     uint16_t PC;
 
     Memory *memory;
+    Keyboard *keyboard;
 
     bool stopFlag;
 
@@ -30,7 +32,7 @@ public slots:
     void onStop();
 
 public:
-    CPU(Memory *);
+    CPU(Memory *memory, Keyboard *keyboard);
 
     void run() override;
     int getVRegister(int num) { if ((num >= 0) && (num <= 0xF)) return V[num]; else return 0; }

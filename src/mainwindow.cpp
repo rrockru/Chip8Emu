@@ -1,13 +1,16 @@
 #include "mainwindow.h"
 
-#include <QFileInfo>
+#include <QApplication>
+#include <QEvent>
 #include <QFileDialog>
-#include <QHeaderView>
-#include <QMessageBox>
+#include <QFileInfo>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QMessageBox>
 #include <QTextEdit>
 #include <QToolBar>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
     memory = new Memory;
     connect(this, &MainWindow::reset, memory, &Memory::onReset);
 
-    cpu = new CPU(memory);
+    keyboard = new Keyboard;
+    connect(this, &MainWindow::reset, keyboard, &Keyboard::onReset);
+
+    cpu = new CPU(memory, keyboard);
     connect(cpu, &CPU::error, this, &MainWindow::onCpuError);
     connect(this, &MainWindow::reset, cpu, &CPU::onReset);
 
@@ -64,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 
     prevFilePath = QDir::currentPath();
+
+    qApp->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -128,4 +136,16 @@ void MainWindow::onReset()
     registersWidget->setEnabled(true);
 
     emit reset();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type()==QEvent::KeyPress || event->type()==QEvent::KeyRelease) {
+        QKeyEvent* key = static_cast<QKeyEvent*>(event);
+        keyboard->onKeyEvent(key->key(), event->type() == QEvent::KeyPress);
+        return true;
+    } else {
+        return QObject::eventFilter(obj, event);
+    }
+    return false;
 }

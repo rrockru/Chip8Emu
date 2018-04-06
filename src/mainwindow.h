@@ -7,6 +7,7 @@
 
 #include "cpu.h"
 #include "memory.h"
+#include "keyboard.h"
 
 #include "display.h"
 #include "hexview.h"
@@ -20,6 +21,7 @@ class MainWindow : public QMainWindow
 
     CPU *cpu;
     Memory *memory;
+    Keyboard *keyboard;
 
     DisplayWidget *displayWidget;
     DisasmWidget *disasmWidget;
@@ -42,6 +44,9 @@ public slots:
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+protected:
+    bool eventFilter(QObject* obj, QEvent* event);
 };
 
 #endif // MAINWINDOW_H

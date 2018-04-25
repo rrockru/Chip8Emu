@@ -332,6 +332,11 @@ void CPU::run()
     while(!stopFlag) {
         usleep(2000);
         onTick();
+
+        if (breakpoints.contains(PC)) {
+            emit breakpoint();
+            break;
+        }
     }
 
     emit finished();

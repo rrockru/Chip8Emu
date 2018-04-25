@@ -3,6 +3,7 @@
 
 #include <QTextEdit>
 
+#include "cpu.h"
 #include "memory.h"
 
 class DisasmWidget : public QTextEdit
@@ -17,8 +18,11 @@ class DisasmWidget : public QTextEdit
     int m_posDisasm;
 
     int currentLine;
-    int currentCommand;
+    int currentAddr;
 
+    int align;
+
+    CPU *cpu;
     Memory *memory;
 
 public slots:
@@ -26,7 +30,7 @@ public slots:
     void highLight();
 
 public:
-    DisasmWidget(QWidget *parent, Memory *memory);
+    DisasmWidget(QWidget *parent, CPU *cpu, Memory *memory);
     void Disasm();
     int GetCurrentLineAddr();
 

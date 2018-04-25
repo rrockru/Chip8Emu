@@ -42,11 +42,12 @@ signals:
     void reset();
 
 public slots:
-    void onOpenRom();
+    void onOpenRomAction();
     void onCpuError(int op, int addr);
-    void onRun();
-    void onStep();
-    void onReset();
+    void onRunAction();
+    void onStepAction();
+    void onResetAction();
+    void onBreakpointAction();
     void onBreakpoint();
 
 public:

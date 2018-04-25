@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     cpu = new CPU(memory, keyboard);
     connect(cpu, &CPU::error, this, &MainWindow::onCpuError);
+    connect(cpu, &CPU::breakpoint, this, &MainWindow::onBreakpoint);
     connect(this, &MainWindow::reset, cpu, &CPU::onReset);
 
     setMinimumSize(1024, 800);
@@ -35,11 +36,11 @@ MainWindow::MainWindow(QWidget *parent)
     resetButton = new QAction(style()->standardIcon(QStyle::SP_BrowserReload), "Reset");
     breakButton = new QAction(style()->standardIcon(QStyle::SP_DialogNoButton), "Breadpoint");
 
-    connect(openRomButton, &QAction::triggered, this, &MainWindow::onOpenRom);
-    connect(runButton, &QAction::triggered, this, &MainWindow::onRun);
-    connect(stepButton, &QAction::triggered, this, &MainWindow::onStep);
-    connect(resetButton, &QAction::triggered, this, &MainWindow::onReset);
-    connect(breakButton, &QAction::triggered, this, &MainWindow::onBreakpoint);
+    connect(openRomButton, &QAction::triggered, this, &MainWindow::onOpenRomAction);
+    connect(runButton, &QAction::triggered, this, &MainWindow::onRunAction);
+    connect(stepButton, &QAction::triggered, this, &MainWindow::onStepAction);
+    connect(resetButton, &QAction::triggered, this, &MainWindow::onResetAction);
+    connect(breakButton, &QAction::triggered, this, &MainWindow::onBreakpointAction);
 
     toolBar->addAction(openRomButton);
     toolBar->addAction(runButton);
@@ -56,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     displayWidget = new DisplayWidget(this, memory);
     connect(cpu, &CPU::draw, displayWidget, &DisplayWidget::draw);
 
-    disasmWidget = new DisasmWidget(this, memory);
+    disasmWidget = new DisasmWidget(this, cpu, memory);
     connect(cpu, &CPU::tick, disasmWidget, &DisasmWidget::setCurrentCommand);
 
     memoryWidget = new HexViewWidget(this, memory);
@@ -94,7 +95,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::onOpenRom()
+void MainWindow::onOpenRomAction()
 {
     QFile file(QFileDialog::getOpenFileName(this, tr("Open ROM"), prevFilePath, tr("ROM Files (*.rom)")));
     if (file.fileName().isEmpty())
@@ -112,6 +113,7 @@ void MainWindow::onOpenRom()
     setWindowTitle(QString("Chip8Emu - %1").arg(file.fileName()));
 
     memory->loadRom(file.readAll());
+    cpu->cleanBreakpoints();
     disasmWidget->Disasm();
     memoryWidget->redraw();
 
@@ -127,7 +129,7 @@ void MainWindow::onCpuError(int op, int addr)
     registersWidget->setEnabled(true);
 }
 
-void MainWindow::onRun()
+void MainWindow::onRunAction()
 {
     if (cpu->isRunning())
         return;
@@ -136,14 +138,14 @@ void MainWindow::onRun()
     cpu->start();
 }
 
-void MainWindow::onStep()
+void MainWindow::onStepAction()
 {
     if (cpu->isRunning())
         return;
     cpu->onTick();
 }
 
-void MainWindow::onReset()
+void MainWindow::onResetAction()
 {
     cpu->onStop();
     memoryWidget->setEnabled(true);
@@ -152,9 +154,14 @@ void MainWindow::onReset()
     emit reset();
 }
 
-void MainWindow::onBreakpoint()
+void MainWindow::onBreakpointAction()
 {
-    QMessageBox::information(this, "Info", QString("Current addr: %1").arg(disasmWidget->GetCurrentLineAddr(), 3, 16));
+    if (!cpu->isBreakpointSets(disasmWidget->GetCurrentLineAddr()))
+        cpu->addBreakpoint(disasmWidget->GetCurrentLineAddr());
+    else
+        cpu->removeBreakpoint(disasmWidget->GetCurrentLineAddr());
+
+    disasmWidget->highLight();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -167,4 +174,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         return QObject::eventFilter(obj, event);
     }
     return false;
+}
+
+void MainWindow::onBreakpoint()
+{
+    memoryWidget->setEnabled(true);
+    registersWidget->setEnabled(true);
 }

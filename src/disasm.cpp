@@ -10,8 +10,9 @@
 
 const int GAP = 8;
 
-DisasmWidget::DisasmWidget(QWidget *parent, Memory *memory):
+DisasmWidget::DisasmWidget(QWidget *parent, CPU *cpu, Memory *memory):
     QTextEdit(parent),
+    cpu(cpu),
     memory(memory)
 {
     setReadOnly(true);
@@ -27,12 +28,13 @@ DisasmWidget::DisasmWidget(QWidget *parent, Memory *memory):
     m_posDisasm = m_posHex + m_charWidth * 5 + GAP;
 
     currentLine = -1;
+    align = 0;
 }
 
 void DisasmWidget::Disasm()
 {
     clear();
-    for (int pc = 0x200; pc < 0x200 + memory->getRomSize(); pc += 2) {
+    for (int pc = 0x200 + align; pc < 0x200 + memory->getRomSize() + align; pc += 2) {
         uint16_t op = memory->getRamWord(pc);
         QString addrOp = QString("%1 %2 %3")
                 .arg(pc, 3, 16)
@@ -242,8 +244,6 @@ void DisasmWidget::Disasm()
         }
         }
     }
-    update();
-    setCurrentCommand(0x200);
 }
 
 void DisasmWidget::paintEvent(QPaintEvent *event)
@@ -264,7 +264,17 @@ void DisasmWidget::paintEvent(QPaintEvent *event)
 
 void DisasmWidget::setCurrentCommand(int pc)
 {
-    currentCommand = (pc - 0x200) / 2;
+    currentAddr = pc;
+
+    if ((currentAddr % 2 == 1) && !align) {
+        align = 1;
+        Disasm();
+    }
+
+    if ((currentAddr % 2 == 0) && align) {
+        align = 0;
+        Disasm();
+    }
 
     highLight();
 }
@@ -283,9 +293,6 @@ void DisasmWidget::highLight()
 {
     QList<QTextEdit::ExtraSelection> extSelections;
 
-    QTextEdit::ExtraSelection currentCommandSelection;
-    QColor currentCommandLineColor = QColor(Qt::yellow).lighter(160);
-
     QTextEdit::ExtraSelection currentLineSelection;
     QColor currentLineColor = QColor(Qt::cyan).lighter(160);
     currentLineSelection.format.setBackground(currentLineColor);
@@ -294,13 +301,27 @@ void DisasmWidget::highLight()
     currentLineSelection.cursor.clearSelection();
     extSelections.append(currentLineSelection);
 
+    foreach (int breakpoint, cpu->getBreakpoints()) {
+        QTextEdit::ExtraSelection breakpointSelection;
+        QColor breakpointColor = QColor(Qt::red).lighter(160);
+        breakpointSelection.format.setBackground(breakpointColor);
+        breakpointSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        breakpointSelection.cursor = QTextCursor(document()->find(QRegExp(QString("^%1").arg(breakpoint, 3, 16, QChar('0')).toUpper())));
+        breakpointSelection.cursor.clearSelection();
+        extSelections.append(breakpointSelection);
+    }
+
+    QTextEdit::ExtraSelection currentCommandSelection;
+    QColor currentCommandLineColor = QColor(Qt::yellow).lighter(160);
     currentCommandSelection.format.setBackground(currentCommandLineColor);
     currentCommandSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    currentCommandSelection.cursor = QTextCursor(document()->findBlockByLineNumber(currentCommand));
+    currentCommandSelection.cursor = QTextCursor(document()->find(QRegExp(QString("^%1").arg(currentAddr, 3, 16, QChar('0')).toUpper())));
     currentCommandSelection.cursor.clearSelection();
-    extSelections.append(currentCommandSelection);
+    extSelections.append(currentCommandSelection);    
 
     setExtraSelections(extSelections);
+
+    setTextCursor(currentCommandSelection.cursor);
 }
 
 int DisasmWidget::GetCurrentLineAddr()

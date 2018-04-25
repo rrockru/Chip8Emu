@@ -19,6 +19,10 @@ void Keyboard::onKeyEvent(int key, bool keyState) {
     for (int i = 0; i < 0x10; i++) {
         if (keyMapping[i] == key) {
             state[i] = keyState;
+            if (keyState)
+                currentKey = i;
+            else
+                currentKey = -1;
         }
     }
 }

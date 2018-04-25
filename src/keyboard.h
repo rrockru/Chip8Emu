@@ -7,6 +7,8 @@ class Keyboard : public QObject
 {
     Q_OBJECT
 
+    int currentKey;
+
     bool state[0x10];
 
 public slots:
@@ -17,6 +19,7 @@ public:
     explicit Keyboard(QObject *parent = nullptr);
 
     bool getKeyState(int key) { return state[key]; }
+    int getCurrentKey() { return currentKey; }
 
 signals:
 

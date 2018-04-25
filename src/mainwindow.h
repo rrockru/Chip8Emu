@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTableView>
 #include <QThread>
+#include <QToolButton>
 
 #include "cpu.h"
 #include "memory.h"
@@ -29,6 +30,12 @@ class MainWindow : public QMainWindow
     RegistersWidget *registersWidget;
     StackWidget *stackWidget;
 
+    QAction *openRomButton;
+    QAction *runButton;
+    QAction *stepButton;
+    QAction *resetButton;
+    QAction *breakButton;
+
     QString prevFilePath;
 
 signals:
@@ -40,6 +47,7 @@ public slots:
     void onRun();
     void onStep();
     void onReset();
+    void onBreakpoint();
 
 public:
     MainWindow(QWidget *parent = 0);

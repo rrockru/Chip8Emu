@@ -16,18 +16,23 @@ class DisasmWidget : public QTextEdit
     int m_posHex;
     int m_posDisasm;
 
+    int currentLine;
+    int currentCommand;
+
     Memory *memory;
 
 public slots:
-    void highlightCurrentLine(int pc);
-    void cleanHighlight();
+    void setCurrentCommand(int pc);
+    void highLight();
 
 public:
     DisasmWidget(QWidget *parent, Memory *memory);
     void Disasm();
+    int GetCurrentLineAddr();
 
 protected:
     void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *e);
 };
 
 #endif // DISASM_H

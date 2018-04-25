@@ -33,7 +33,8 @@ SOURCES += \
     src/disasm.cpp \
     src/registers.cpp \
     src/stack.cpp \
-    src/keyboard.cpp
+    src/keyboard.cpp \
+    src/timer.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -45,6 +46,7 @@ HEADERS += \
     src/registers.h \
     src/stack.h \
     src/config.h \
-    src/keyboard.h
+    src/keyboard.h \
+    src/timer.h
 
 DISTFILES +=

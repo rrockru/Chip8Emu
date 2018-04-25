@@ -10,6 +10,9 @@ CPU::CPU(Memory *memory, Keyboard *keyboard):
     memory(memory),
     keyboard(keyboard)
 {
+    delayTimer = new Timer;
+    soundTimer = new Timer;
+
     onReset();
 }
 
@@ -235,7 +238,7 @@ void CPU::onTick()
                 bool oldBit = memory->getVRamBit((y + j) * 64 + (x + i));
                 bool newBit = (memory->getRamByte(I + j) >> (7 - (i % 8))) & 1;
                 if (oldBit && !newBit) flipFlag = true;
-                memory->setVRamBit((y + j) * 64 + (x + i), (memory->getRamByte(I + j) >> (7 - (i % 8))) & 1);
+                memory->setVRamBit((y + j) * 64 + (x + i), oldBit ^ newBit);
             }
         }
 
@@ -259,6 +262,49 @@ void CPU::onTick()
             /* EXA1 SKNP skip next if key in VX is not pressed */
             if (!keyboard->getKeyState(V[(op >> 8) & 0xF]))
                 PC += 2;
+
+            break;
+        }
+        default:
+            break;
+        }
+
+        PC += 2;
+        break;
+    }
+    case 0xF: {
+        switch (op & 0xFF) {
+        case 0x07: {
+            /* FX07 LD load value of delay timer to VX register */
+            V[(op >> 8) & 0xF] = delayTimer->getValue();
+
+            break;
+        }
+        case 0x0A: {
+            /* FX0A LD wait for key and set its value to VX */
+            int currentKey;
+            if(currentKey = keyboard->getCurrentKey() == -1)
+                PC -= 2;
+            else
+                V[(op >> 8) & 0xF] = currentKey;
+
+            break;
+        }
+        case 0x15: {
+            /* FX15 LD set delay timer to VX */
+            delayTimer->setValue(V[(op >> 8) & 0xF]);
+
+            break;
+        }
+        case 0x18: {
+            /* FX18 LD set sound timer to VX */
+            soundTimer->setValue(V[(op >> 8) & 0xF]);
+
+            break;
+        }
+        case 0x1E: {
+            /*FX1E ADD add VX to I */
+            I += V[(op >> 8) & 0xF];
 
             break;
         }

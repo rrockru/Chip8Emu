@@ -1,5 +1,7 @@
 #include "disasm.h"
 
+#include <QDebug>
+
 #include <QPainter>
 #include <QPaintEvent>
 #include <QScrollBar>
@@ -23,6 +25,8 @@ DisasmWidget::DisasmWidget(QWidget *parent, Memory *memory):
     m_posAddr = 0;
     m_posHex = m_charWidth * 3 + GAP;
     m_posDisasm = m_posHex + m_charWidth * 5 + GAP;
+
+    currentLine = -1;
 }
 
 void DisasmWidget::Disasm()
@@ -239,7 +243,7 @@ void DisasmWidget::Disasm()
         }
     }
     update();
-    highlightCurrentLine(0x200);
+    setCurrentCommand(0x200);
 }
 
 void DisasmWidget::paintEvent(QPaintEvent *event)
@@ -258,27 +262,57 @@ void DisasmWidget::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::black);
 }
 
-void DisasmWidget::highlightCurrentLine(int pc)
+void DisasmWidget::setCurrentCommand(int pc)
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
+    currentCommand = (pc - 0x200) / 2;
 
-    QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::yellow).lighter(160);
-
-    selection.format.setBackground(lineColor);
-    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    selection.cursor = document()->find(QRegExp(QString("^%1 ").arg(pc, 3, 16).toUpper()));
-    //selection.cursor = QTextCursor(document()->findBlockByLineNumber((pc - 0x200) / 2));
-    selection.cursor.clearSelection();
-    extraSelections.append(selection);
-
-    setExtraSelections(extraSelections);
-
-    setTextCursor(selection.cursor);
+    highLight();
 }
 
-void DisasmWidget::cleanHighlight()
+void DisasmWidget::mousePressEvent(QMouseEvent *e)
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
-    setExtraSelections(extraSelections);
+    QTextEdit::mousePressEvent(e);
+    QTextCursor cursor = cursorForPosition(e->pos());
+
+    currentLine = cursor.blockNumber();
+
+    highLight();
+}
+
+void DisasmWidget::highLight()
+{
+    QList<QTextEdit::ExtraSelection> extSelections;
+
+    QTextEdit::ExtraSelection currentCommandSelection;
+    QColor currentCommandLineColor = QColor(Qt::yellow).lighter(160);
+
+    QTextEdit::ExtraSelection currentLineSelection;
+    QColor currentLineColor = QColor(Qt::cyan).lighter(160);
+    currentLineSelection.format.setBackground(currentLineColor);
+    currentLineSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    currentLineSelection.cursor = QTextCursor(document()->findBlockByLineNumber(currentLine));
+    currentLineSelection.cursor.clearSelection();
+    extSelections.append(currentLineSelection);
+
+    currentCommandSelection.format.setBackground(currentCommandLineColor);
+    currentCommandSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    currentCommandSelection.cursor = QTextCursor(document()->findBlockByLineNumber(currentCommand));
+    currentCommandSelection.cursor.clearSelection();
+    extSelections.append(currentCommandSelection);
+
+    setExtraSelections(extSelections);
+}
+
+int DisasmWidget::GetCurrentLineAddr()
+{
+    QTextCursor cursor = QTextCursor(document()->findBlockByLineNumber(currentLine));
+    cursor.select(QTextCursor::WordUnderCursor);
+    QString code = cursor.selectedText();
+
+    if (code.length() > 0) {
+        int addr = code.mid(0, 3).toInt(nullptr, 16);
+        return addr;
+    }
+
+    return 0;
 }

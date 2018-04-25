@@ -28,10 +28,25 @@ MainWindow::MainWindow(QWidget *parent)
     setMinimumSize(1024, 800);
 
     QToolBar *toolBar = new QToolBar(this);
-    toolBar->addAction(style()->standardIcon(QStyle::SP_DirIcon), "Open", this, &MainWindow::onOpenRom);
-    toolBar->addAction(style()->standardIcon(QStyle::SP_MediaPlay), "Run", this, &MainWindow::onRun);
-    toolBar->addAction(style()->standardIcon(QStyle::SP_MediaSkipForward), "Step", this, &MainWindow::onStep);
-    toolBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), "Reset", this, &MainWindow::onReset);
+
+    openRomButton = new QAction(style()->standardIcon(QStyle::SP_DirIcon), "Open");
+    runButton = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), "Run");
+    stepButton = new QAction(style()->standardIcon(QStyle::SP_MediaSkipForward), "Step");
+    resetButton = new QAction(style()->standardIcon(QStyle::SP_BrowserReload), "Reset");
+    breakButton = new QAction(style()->standardIcon(QStyle::SP_DialogNoButton), "Breadpoint");
+
+    connect(openRomButton, &QAction::triggered, this, &MainWindow::onOpenRom);
+    connect(runButton, &QAction::triggered, this, &MainWindow::onRun);
+    connect(stepButton, &QAction::triggered, this, &MainWindow::onStep);
+    connect(resetButton, &QAction::triggered, this, &MainWindow::onReset);
+    connect(breakButton, &QAction::triggered, this, &MainWindow::onBreakpoint);
+
+    toolBar->addAction(openRomButton);
+    toolBar->addAction(runButton);
+    toolBar->addAction(stepButton);
+    toolBar->addAction(resetButton);
+    toolBar->addAction(breakButton);
+
     addToolBar(toolBar);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
@@ -42,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cpu, &CPU::draw, displayWidget, &DisplayWidget::draw);
 
     disasmWidget = new DisasmWidget(this, memory);
-    connect(cpu, &CPU::tick, disasmWidget, &DisasmWidget::highlightCurrentLine);
+    connect(cpu, &CPU::tick, disasmWidget, &DisasmWidget::setCurrentCommand);
 
     memoryWidget = new HexViewWidget(this, memory);
     connect(cpu, &CPU::tick, memoryWidget, &HexViewWidget::redraw);
@@ -118,7 +133,6 @@ void MainWindow::onRun()
         return;
     memoryWidget->setEnabled(false);
     registersWidget->setEnabled(false);
-    disasmWidget->cleanHighlight();
     cpu->start();
 }
 
@@ -136,6 +150,11 @@ void MainWindow::onReset()
     registersWidget->setEnabled(true);
 
     emit reset();
+}
+
+void MainWindow::onBreakpoint()
+{
+    QMessageBox::information(this, "Info", QString("Current addr: %1").arg(disasmWidget->GetCurrentLineAddr(), 3, 16));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)

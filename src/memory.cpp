@@ -11,7 +11,8 @@ Memory::Memory()
     for (int i = 0; i < 0x200; i++)
         ram[i] = 0;
 
-    ram.replace(0, 0x200, QByteArray::fromRawData((const char*)rom, 0x200));
+    //ram.replace(0, 0x200, QByteArray::fromRawData((const char*)rom, 0x200));
+    ram.replace(0, 0x200, QByteArray::fromRawData((const char*)ascii, 0x200));
 
     clear();
 }

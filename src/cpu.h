@@ -5,6 +5,7 @@
 
 #include "memory.h"
 #include "keyboard.h"
+#include "timer.h"
 
 class CPU: public QThread
 {
@@ -14,6 +15,9 @@ class CPU: public QThread
     uint16_t I;
     uint16_t SP;
     uint16_t PC;
+
+    Timer *delayTimer;
+    Timer *soundTimer;
 
     Memory *memory;
     Keyboard *keyboard;

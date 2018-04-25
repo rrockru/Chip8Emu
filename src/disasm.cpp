@@ -237,6 +237,76 @@ void DisasmWidget::Disasm()
             }
             break;
         }
+        case 0xF: {
+            switch (op & 0xFF) {
+            case 0x07: {
+                append(QString("%1 LD V%2 DT")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x0A: {
+                append(QString("%1 LD V%2 K")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x15: {
+                append(QString("%1 LD DT V%2")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x18: {
+                append(QString("%1 LD ST V%2")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x1E: {
+                append(QString("%1 ADD I V%2")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x29: {
+                append(QString("%1 LD I SPR[V%2]")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x33: {
+                append(QString("%1 BCD V%2 [I]")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x55: {
+                append(QString("%1 ST V%2 [i]")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            case 0x65: {
+                append(QString("%1 LD V%2 [I]")
+                       .arg(addrOp)
+                       .arg((op >> 8) & 0xF, 1, 16).toUpper());
+
+                break;
+            }
+            default:
+                break;
+            }
+            break;
+        }
         default: {
             append(QString("%1 ???")
                    .arg(addrOp).toUpper());

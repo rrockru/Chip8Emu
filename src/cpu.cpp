@@ -308,6 +308,36 @@ void CPU::onTick()
 
             break;
         }
+        case 0x29: {
+            /* FX29 LD set I to addr of VX sprite */
+            I = V[(op >> 8) & 0xF] * 5;
+
+            break;
+        }
+        case 0x33: {
+            /* FX33 BCD BCD VX and store in I - I+3 */
+            memory->setRamByte(I, V[(op >> 8) & 0xF] / 100);
+            memory->setRamByte(I + 1, (V[(op >> 8) & 0xF] % 100) / 10);
+            memory->setRamByte(I + 1, (V[(op >> 8) & 0xF] % 10));
+
+            break;
+        }
+        case 0x55: {
+            /* FX55 ST store V0-VX in I+ */
+            for (int i = 0; i <= ((op >> 8) & 0xF); i++) {
+                memory->setRamByte(I++, V[i]);
+            }
+
+            break;
+        }
+        case 0x65: {
+            /* FX65 LD load V0-VX from I+ */
+            for (int i = 0; i <= ((op >> 8) & 0xF); i++) {
+                V[i] = memory->getRamByte(I++);
+            }
+
+            break;
+        }
         default:
             break;
         }

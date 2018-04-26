@@ -149,42 +149,40 @@ void CPU::onTick()
         case 0x4: {
             /* 8XY4 ADD set VX to VX + VY with carry */
             uint16_t res = V[(op >> 8) & 0xF] + V[(op >> 4) & 0xF];
-            V[0xF] = (res >> 8) ? 1 : 0;
-            V[(op >> 8) & 0xF] = res &0xFF;
+            V[0xF] = (res > 0xFF) ? 1 : 0;
+            V[(op >> 8) & 0xF] = res & 0xFF;
 
             PC += 2;
             break;
         }
         case 0x5: {
             /* 8XY5 SUB set VX to VX - VY with borrow */
-            uint16_t res = V[(op >> 8) & 0xF] - V[(op >> 4) & 0xF];
-            V[0xF] = (res >> 8) ? 1 : 0;
-            V[(op >> 8) & 0xF] = res &0xFF;
+            V[0xF] = V[(op >> 8) & 0xF] > V[(op >> 4) & 0xF] ? 1 : 0;
+            V[(op >> 8) & 0xF] -= V[(op >> 4) & 0xF];
 
             PC += 2;
             break;
         }
         case 0x6: {
             /* 8XY6 SHR shift VY by one and copy result to VX. VF = LSB */
-            V[0xF] = V[(op >> 4) * 0xF] & 1;
-            V[(op >> 8) & 0xF] = V[(op >> 4) * 0xF] >> 1;
+            V[0xF] = V[(op >> 8) & 0xF] & 1;
+            V[(op >> 8) & 0xF] = V[(op >> 8) & 0xF] >> 1;
 
             PC += 2;
             break;
         }
         case 0x7: {
             /* 8XY7 SUB set VX to VY - VX with borrow */
-            uint16_t res = V[(op >> 4) & 0xF] - V[(op >> 8) & 0xF];
-            V[0xF] = (res >> 8) ? 1 : 0;
-            V[(op >> 8) & 0xF] = res &0xFF;
+            V[0xF] = V[(op >> 4) & 0xF] > V[(op >> 8) & 0xF];
+            V[(op >> 4) & 0xF] -= V[(op >> 8) & 0xF];
 
             PC += 2;
             break;
         }
         case 0xE: {
             /* 8XYE SHL shift VY by one and copy result to VX. VF = MSB */
-            V[0xF] = (V[(op >> 4) * 0xF] >> 7) & 1;
-            V[(op >> 8) & 0xF] = (V[(op >> 4) * 0xF] << 1) & 0xFF;
+            V[0xF] = (V[(op >> 8) & 0xF] >> 7) & 1;
+            V[(op >> 8) & 0xF] = (V[(op >> 8) & 0xF] << 1) & 0xFF;
 
             PC += 2;
             break;
@@ -237,8 +235,9 @@ void CPU::onTick()
             for (int i = 0; i < 8; i++) {
                 bool oldBit = memory->getVRamBit((y + j) * 64 + (x + i));
                 bool newBit = (memory->getRamByte(I + j) >> (7 - (i % 8))) & 1;
-                if (oldBit && !newBit) flipFlag = true;
-                memory->setVRamBit((y + j) * 64 + (x + i), oldBit ^ newBit);
+                if (oldBit && newBit)
+                    flipFlag = true;
+                memory->setVRamBit((y + j) * 64 + (x + i), newBit);
             }
         }
 
